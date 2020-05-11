@@ -65,3 +65,29 @@ def tobs():
         tobs_list.append(tob_12month)
 
     return jsonify(tobs_list)
+@app.route("/api/v1.0/<start>")
+def temps(start):
+    session=Session(engine)
+    t=session.query(func.min(Measurement.tobs),func.max(Measurement.tobs), func.avg(Measurement.tobs)).filter(Measurement.date == start )
+    session.close()
+    temp_list=[]
+    for min, max, avg in t:
+        tob={}
+        tob["TMIN"]=min
+        tob["TMAX"]=max
+        tob["TAVG"]=avg
+        temp_list.append(tob)
+    return jsonify(temp_list)
+@app.route("/api/v1.0/<start>/<end>")
+def holiday(start, end):
+    session=Session(engine)
+    holiday_t=session.query(func.min(Measurement.tobs),func.max(Measurement.tobs), func.avg(Measurement.tobs)).filter(Measurement.date >= start ).filter(Measurement.date <= end )
+    session.close()
+    temp=[]
+    for min, max, avg in holiday_t:
+        temp_dict={}
+        temp_dict["TMIN"]=min
+        temp_dict["TMAX"] = max
+        temp_dict["TAVG"] = avg
+        temp.append(temp_dict)
+    return jsonify(temp)
